@@ -52,25 +52,30 @@ startButton.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (e) => {
+  let boardChanged = false;
   let gameStatus = game.getStatus();
 
-  if (gameStatus === 'lose') {
+  if (gameStatus !== 'playing') {
     return;
   }
 
   switch (e.key) {
     case 'ArrowLeft':
-      game.moveLeft();
+      boardChanged = game.moveLeft();
       break;
     case 'ArrowRight':
-      game.moveRight();
+      boardChanged = game.moveRight();
       break;
     case 'ArrowUp':
-      game.moveUp();
+      boardChanged = game.moveUp();
       break;
     case 'ArrowDown':
-      game.moveDown();
+      boardChanged = game.moveDown();
       break;
+  }
+
+  if (!boardChanged) {
+    return;
   }
 
   gameStatus = game.getStatus();

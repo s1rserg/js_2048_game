@@ -38,94 +38,50 @@ class Game {
   }
 
   moveLeft() {
-    if (this.status !== 'playing') {
-      return false;
-    }
-
-    const newState = this.state.map((row) => [...row]);
-    const didSwipe = this.swipeRows('left', newState);
-    const didMerge = this.combineRows('left', newState);
-
-    if (didMerge) {
-      this.swipeRows('left', newState);
-    }
-
-    if (didSwipe || didMerge) {
-      this.state = newState;
-      this.generate();
-      this.checkStatus();
-
-      return true;
-    }
-
-    return false;
+    return this.move('left');
   }
 
   moveRight() {
-    if (this.status !== 'playing') {
-      return false;
-    }
-
-    const newState = this.state.map((row) => [...row]);
-    const didSwipe = this.swipeRows('right', newState);
-    const didMerge = this.combineRows('right', newState);
-
-    if (didMerge) {
-      this.swipeRows('right', newState);
-    }
-
-    if (didSwipe || didMerge) {
-      this.state = newState;
-      this.generate();
-      this.checkStatus();
-
-      return true;
-    }
-
-    return false;
+    return this.move('right');
   }
 
   moveUp() {
-    if (this.status !== 'playing') {
-      return false;
-    }
-
-    const newState = this.state.map((row) => [...row]);
-    const transposed = this.transpose(newState);
-    const didSwipe = this.swipeRows('left', transposed);
-    const didMerge = this.combineRows('left', transposed);
-
-    if (didMerge) {
-      this.swipeRows('left', transposed);
-    }
-
-    if (didSwipe || didMerge) {
-      this.state = this.transpose(transposed);
-      this.generate();
-      this.checkStatus();
-
-      return true;
-    }
-
-    return false;
+    return this.move('up');
   }
 
   moveDown() {
+    return this.move('down');
+  }
+
+  move(direction) {
     if (this.status !== 'playing') {
       return false;
     }
 
+    const needsTranspose = direction === 'up' || direction === 'down';
+    const swipeDirection =
+      direction === 'up' || direction === 'left' ? 'left' : 'right';
     const newState = this.state.map((row) => [...row]);
-    const transposed = this.transpose(newState);
-    const didSwipe = this.swipeRows('right', transposed);
-    const didMerge = this.combineRows('right', transposed);
+    let matrix = newState;
+
+    if (needsTranspose) {
+      matrix = this.transpose(newState);
+    }
+
+    const didSwipe = this.swipeRows(swipeDirection, matrix);
+    const didMerge = this.combineRows(swipeDirection, matrix);
 
     if (didMerge) {
-      this.swipeRows('right', transposed);
+      this.swipeRows(swipeDirection, matrix);
     }
 
     if (didSwipe || didMerge) {
-      this.state = this.transpose(transposed);
+      if (needsTranspose) {
+        this.state = this.transpose(matrix);
+      } else {
+        this.state = matrix;
+      }
+
       this.generate();
       this.checkStatus();
 
