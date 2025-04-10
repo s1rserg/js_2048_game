@@ -34,6 +34,7 @@ class Game {
     this.score = 0;
     this.status = 'idle';
     this.dim = 4;
+    this.twoProbability = 0.9;
   }
 
   moveLeft() {
@@ -89,44 +90,49 @@ class Game {
       return false;
     }
 
-    let isChanged = false;
     const newState = this.state.map((row) => [...row]);
     const transposed = this.transpose(newState);
+    const didSwipe = this.swipeRows('left', transposed);
+    const didMerge = this.combineRows('left', transposed);
 
-    isChanged = this.swipeRows('left', transposed) || isChanged;
-    isChanged = this.combineRows('left', transposed) || isChanged;
-
-    if (isChanged) {
+    if (didMerge) {
       this.swipeRows('left', transposed);
+    }
+
+    if (didSwipe || didMerge) {
       this.state = this.transpose(transposed);
       this.generate();
+      this.checkStatus();
 
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   }
+
   moveDown() {
     if (this.status !== 'playing') {
       return false;
     }
 
-    let isChanged = false;
     const newState = this.state.map((row) => [...row]);
     const transposed = this.transpose(newState);
+    const didSwipe = this.swipeRows('right', transposed);
+    const didMerge = this.combineRows('right', transposed);
 
-    isChanged = this.swipeRows('right', transposed) || isChanged;
-    isChanged = this.combineRows('right', transposed) || isChanged;
-
-    if (isChanged) {
+    if (didMerge) {
       this.swipeRows('right', transposed);
+    }
+
+    if (didSwipe || didMerge) {
       this.state = this.transpose(transposed);
       this.generate();
+      this.checkStatus();
 
       return true;
-    } else {
-      return false;
     }
+
+    return false;
   }
 
   swipeRows(direction = 'left', matrix = this.state) {
@@ -207,7 +213,7 @@ class Game {
     const [row, col] =
       emptyCells[Math.floor(Math.random() * emptyCells.length)];
 
-    this.state[row][col] = Math.random() < 0.9 ? 2 : 4;
+    this.state[row][col] = Math.random() < this.twoProbability ? 2 : 4;
 
     return true;
   }
@@ -279,7 +285,7 @@ class Game {
   restart() {
     this.score = 0;
     this.status = 'idle';
-    this.state = this.initialState;
+    this.state = this.initialState.map((row) => [...row]);
   }
 }
 
